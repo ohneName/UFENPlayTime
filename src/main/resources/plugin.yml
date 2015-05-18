@@ -1,0 +1,8 @@
+name: UFENPlayTime
+main: de.ohneName.UFENPlayTime.UFENPlayTime
+version: 1.0
+
+commands:
+  playtime:
+    description: Get your playtime
+    usage: /playtime '[player]'

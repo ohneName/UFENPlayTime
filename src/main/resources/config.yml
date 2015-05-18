@@ -1,0 +1,4 @@
+commandEnabled: true
+scoreboardObjective:
+  name: onlineTime
+  displayName: Online Time
