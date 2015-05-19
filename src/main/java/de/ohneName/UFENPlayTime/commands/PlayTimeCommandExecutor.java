@@ -34,7 +34,19 @@ public class PlayTimeCommandExecutor implements CommandExecutor {
     }
 
     protected boolean handlePlayer(Player player, Command cmd, String label, String[] args) {
-        int[] times = UFENPlayTime.splitToComponentTimes(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20);
+        // TODO: ozzy: fix this :P
+        int[] times;
+
+        if(args[0]) { // FOR: /playtime [playername]
+            // TODO: does the requested player exists?
+            // Does this even work?
+            Player otherPlayer = new Player(args[0]);
+            // I don't know
+            times = UFENPlayTime.splitToComponentTimes(otherPlayer.getStatistic(Statistic.PLAY_ONE_TICK) / 20);
+            // Javanoob at work
+        } else { // own playtime
+            times = UFENPlayTime.splitToComponentTimes(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20);
+        }
 
         player.sendMessage(ChatColor.GRAY + "Play time: " + ChatColor.GOLD + times[0] + ":" + String.format("%02d", times[1]) + " h");
         return true;
