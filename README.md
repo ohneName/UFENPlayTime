@@ -7,8 +7,9 @@ This plugin allows the easy displaying of a players play time on the current map
 
 ### Commands
 
-* __`/playtime`__  
-  Displays a players play time in hours and minutes. The command can be disabled in the configuration.
+* __`/playtime [player]`__  
+  Displays a players play time in hours and minutes. The command can be disabled in the configuration.  
+  With a given player name, the play time for this player will be displayed.
   
 ---
 
