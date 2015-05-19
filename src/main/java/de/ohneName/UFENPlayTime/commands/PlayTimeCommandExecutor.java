@@ -96,7 +96,7 @@ public class PlayTimeCommandExecutor implements CommandExecutor {
                 @SuppressWarnings("deprecation")
                 OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(playerName);
 
-                times = plugin.getPlayerTimes(offlinePlayer.getPlayer());
+                times = plugin.getPlayerTimes(offlinePlayer);
                 realName = offlinePlayer.getName();
             }
 
