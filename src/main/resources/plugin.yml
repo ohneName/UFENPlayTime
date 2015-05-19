@@ -1,6 +1,6 @@
 name: UFENPlayTime
 main: de.ohneName.UFENPlayTime.UFENPlayTime
-version: 1.0
+version: 1.0.1
 
 commands:
   playtime:
