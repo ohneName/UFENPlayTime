@@ -13,19 +13,19 @@ public final class UFENPlayTime extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        this.getLogger().info("[UFENPlayTime] loading ...");
+        this.getLogger().info("loading ...");
         this.saveDefaultConfig();
 
         if(this.getConfig().getBoolean("commandEnabled")) {
             this.getCommand("playtime").setExecutor(new PlayTimeCommandExecutor(this));
-            this.getLogger().info(" Commands are enabled.");
+            this.getLogger().info("Commands are enabled.");
         }
         else {
-            this.getLogger().info(" Commands are NOT enabled.");
+            this.getLogger().info("Commands are NOT enabled.");
         }
 
         // Register ScoreBoard handler
-        this.getLogger().info(" Registering scoreboard objective.");
+        this.getLogger().info("Registering scoreboard objective.");
         this.scoreboardHandler = new ScoreboardHandler(this);
 
         // Register async update task every 10 seconds (200 ticks)
@@ -34,13 +34,13 @@ public final class UFENPlayTime extends JavaPlugin {
         // Register onJoin listener
         new PlayerJoinListener(this);
 
-        this.getLogger().info(" Plugin loaded.");
+        this.getLogger().info("Plugin loaded.");
 
     }
 
     @Override
     public void onDisable() {
-        this.getLogger().info(" Shutting down.");
+        this.getLogger().info("Shutting down.");
     }
 
     public ScoreboardHandler getScoreboardHandler() {
