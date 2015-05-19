@@ -2,6 +2,7 @@ package de.ohneName.UFENPlayTime.commands;
 
 import de.ohneName.UFENPlayTime.UFENPlayTime;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,26 +30,83 @@ public class PlayTimeCommandExecutor implements CommandExecutor {
     }
 
     protected boolean handleConsole(CommandSender sender, Command cmd, String label, String[] args) {
-        sender.sendMessage("Consoles don't have a play time.");
-        return false;
+
+        int[] times;
+
+        // Output for yourself
+        if(args.length == 0) {
+            sender.sendMessage("You need to put a player name.");
+        }
+        // We want someone else's playtime!
+        else {
+            String playerName = args[0];
+            String realName;
+
+            // Try to find player online
+            Player p = plugin.getServer().getPlayer(playerName);
+
+            if(p != null) {
+                times = plugin.getPlayerTimes(p);
+                realName = p.getName();
+            }
+            // Player could not be found
+            else {
+                // Method is deprecated, but that's ok for now. Using UUIDs in commands is bullshit
+                @SuppressWarnings("deprecation")
+                OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(playerName);
+
+                times = plugin.getPlayerTimes(offlinePlayer);
+                realName = offlinePlayer.getName();
+            }
+
+            if(times != null) {
+                sender.sendMessage(ChatColor.GRAY + realName + "'s play time: " + ChatColor.GOLD + times[0] + ":" + String.format("%02d", times[1]) + " h");
+            }
+            else {
+                sender.sendMessage(ChatColor.GRAY + "Player " + realName + " couldn't be found.");
+            }
+        }
+        return true;
     }
 
     protected boolean handlePlayer(Player player, Command cmd, String label, String[] args) {
-        // TODO: ozzy: fix this :P
+
         int[] times;
 
-        if(args[0]) { // FOR: /playtime [playername]
-            // TODO: does the requested player exists?
-            // Does this even work?
-            Player otherPlayer = new Player(args[0]);
-            // I don't know
-            times = UFENPlayTime.splitToComponentTimes(otherPlayer.getStatistic(Statistic.PLAY_ONE_TICK) / 20);
-            // Javanoob at work
-        } else { // own playtime
-            times = UFENPlayTime.splitToComponentTimes(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20);
+        // Output for yourself
+        if(args.length == 0) {
+            times = plugin.getPlayerTimes(player);
+            player.sendMessage(ChatColor.GRAY + "Your play time: " + ChatColor.GOLD + times[0] + ":" + String.format("%02d", times[1]) + " h");
         }
+        // We want someone else's playtime!
+        else {
+            String playerName = args[0];
+            String realName;
 
-        player.sendMessage(ChatColor.GRAY + "Play time: " + ChatColor.GOLD + times[0] + ":" + String.format("%02d", times[1]) + " h");
+            // Try to find player online
+            Player p = plugin.getServer().getPlayer(playerName);
+
+            if(p != null) {
+                times = plugin.getPlayerTimes(p);
+                realName = p.getName();
+            }
+            // Player could not be found
+            else {
+                // Method is deprecated, but that's ok for now. Using UUIDs in commands is bullshit
+                @SuppressWarnings("deprecation")
+                OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(playerName);
+
+                times = plugin.getPlayerTimes(offlinePlayer.getPlayer());
+                realName = offlinePlayer.getName();
+            }
+
+            if(times != null) {
+                player.sendMessage(ChatColor.GRAY + realName + "'s play time: " + ChatColor.GOLD + times[0] + ":" + String.format("%02d", times[1]) + " h");
+            }
+            else {
+                player.sendMessage(ChatColor.GRAY + "Player " + realName + " couldn't be found.");
+            }
+        }
         return true;
     }
 
