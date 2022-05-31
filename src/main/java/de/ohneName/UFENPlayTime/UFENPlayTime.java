@@ -1,6 +1,8 @@
 package de.ohneName.UFENPlayTime;
 
-import com.sun.istack.internal.Nullable;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import de.ohneName.UFENPlayTime.commands.PlayTimeCommandExecutor;
 import de.ohneName.UFENPlayTime.listener.PlayerJoinListener;
 import de.ohneName.UFENPlayTime.scheduler.UpdateScoreTask;
@@ -9,19 +11,20 @@ import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Objects;
 import java.util.UUID;
 
 
-public final class UFENPlayTime extends JavaPlugin {
+public class UFENPlayTime extends JavaPlugin {
 
     protected ScoreboardHandler scoreboardHandler;
+    private Gson gson;
 
     @Override
     public void onEnable() {
@@ -30,12 +33,15 @@ public final class UFENPlayTime extends JavaPlugin {
         this.saveDefaultConfig();
 
         if(this.getConfig().getBoolean("commandEnabled")) {
-            this.getCommand("playtime").setExecutor(new PlayTimeCommandExecutor(this));
+            Objects.requireNonNull(this.getCommand("playtime")).setExecutor(new PlayTimeCommandExecutor(this));
             this.getLogger().info("Commands are enabled.");
         }
         else {
             this.getLogger().info("Commands are NOT enabled.");
         }
+
+        // Load JSON library
+        gson = new Gson();
 
         // Register ScoreBoard handler
         this.getLogger().info("Registering scoreboard objective.");
@@ -60,46 +66,45 @@ public final class UFENPlayTime extends JavaPlugin {
         return scoreboardHandler;
     }
 
-    public int[] getPlayerTimes(OfflinePlayer offlinePlayer) {
-        // Needs to have played before, otherwise there's no statistics for that player
-        if(offlinePlayer.getPlayer() != null) {
-            return UFENPlayTime.splitToComponentTimes(offlinePlayer.getPlayer().getStatistic(Statistic.PLAY_ONE_TICK) / 20);
-        }
-        else {
-            // We assume the player has statistics and read the json file directly
-            if(offlinePlayer.hasPlayedBefore()) {
-                UUID uuid = offlinePlayer.getUniqueId();
-                World world = this.getServer().getWorlds().get(0);
-                File statsFile = new File(new File(world.getWorldFolder(), "stats"), uuid.toString() + ".json");
+    public Duration getPlayerPlayTime(OfflinePlayer offlinePlayer) throws PlayerUnknownException {
 
-                JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject;
-                try {
-                    FileReader fileReader = new FileReader(statsFile);
-                    jsonObject = (JSONObject) jsonParser.parse(fileReader);
-                    fileReader.close();
-                } catch (IOException | ParseException e) {
-                    return null;
-                }
+        int minutesPlayed = getStatisticPlayOneMinute(offlinePlayer);
 
-                long minutesPlayed = (long) jsonObject.get("stat.playOneMinute");
+        return Duration.ofMinutes(minutesPlayed);
 
-                return UFENPlayTime.splitToComponentTimes(minutesPlayed / 20);
-            }
-            else {
-                return null;
-            }
-        }
     }
 
-    /*
-     * http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds-android-java
-     */
-    public static int[] splitToComponentTimes(long biggy) {
-        int hours = (int) biggy / 3600;
-        int remainder = (int) biggy - hours * 3600;
-        int mins = remainder / 60;
 
-        return new int[]{hours, mins};
+    public int getStatisticPlayOneMinute(OfflinePlayer offlinePlayer) throws PlayerUnknownException {
+        if (offlinePlayer.getPlayer() != null) {
+            int ticksPlayed =  offlinePlayer.getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE);
+            return Math.toIntExact(ticksPlayed / 20 / 60);
+        } else {
+            if (offlinePlayer.hasPlayedBefore()) {
+
+                UUID uuid = offlinePlayer.getUniqueId();
+                World world = this.getServer().getWorlds().get(0);
+                File statsFile = new File(new File(world.getWorldFolder(), "stats"), uuid + ".json");
+
+                try {
+                    FileReader fileReader = new FileReader(statsFile);
+                    JsonReader reader = new JsonReader(fileReader);
+                    JsonObject json = gson.fromJson(reader, JsonObject.class);
+
+                    long ticksPlayed = json.getAsJsonObject("stats")
+                            .getAsJsonObject("minecraft:custom")
+                            .getAsJsonObject("minecraft:play_time").getAsLong();
+
+                    // 20 Ticks per second, 60 seconds per Minute
+                    return Math.toIntExact(ticksPlayed / 20 / 60);
+
+
+                } catch (FileNotFoundException e) {
+                    throw new PlayerUnknownException();
+                }
+            }
+        }
+
+        throw new PlayerUnknownException();
     }
 }

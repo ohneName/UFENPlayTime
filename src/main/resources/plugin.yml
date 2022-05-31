@@ -1,8 +1,9 @@
 name: UFENPlayTime
 main: de.ohneName.UFENPlayTime.UFENPlayTime
-version: 1.0.1
+version: 1.1
+api-version: 1.18
 
 commands:
   playtime:
-    description: Get your playtime
-    usage: /playtime '[player]'
+    description: Get your playtime or another player's playtime.
+    usage: /<command> [player]
