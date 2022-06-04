@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - master
   workflow_call:
+  pull_request:
+    types:
+      - opened
+      - reopened
 
 jobs:
   build:
