@@ -93,7 +93,7 @@ public class UFENPlayTime extends JavaPlugin {
 
                     long ticksPlayed = json.getAsJsonObject("stats")
                             .getAsJsonObject("minecraft:custom")
-                            .getAsJsonObject("minecraft:play_time").getAsLong();
+                            .getAsJsonPrimitive("minecraft:play_time").getAsLong();
 
                     // 20 Ticks per second, 60 seconds per Minute
                     return Math.toIntExact(ticksPlayed / 20 / 60);
